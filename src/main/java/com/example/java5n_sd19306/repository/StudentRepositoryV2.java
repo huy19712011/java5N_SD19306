@@ -31,6 +31,13 @@ public interface StudentRepositoryV2 extends JpaRepository<Student, Long> {
     @Query(value = "SELECT * FROM students s WHERE s.name=:name OR s.id=:id", nativeQuery = true)
     List<Student> findByNameOrIdV3b(String name, long id);
 
-
     // 4. Named queries
+    // JPQL
+    List<Student> findByNameV4a(String name);
+
+    // Native
+    @Query(nativeQuery = true)
+    List<Student> findByNameV4b(String name);
+
+
 }
