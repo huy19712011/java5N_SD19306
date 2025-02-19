@@ -5,13 +5,11 @@ import com.example.java5n_sd19306.service.StudentService;
 import jakarta.persistence.EntityManager;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.service.annotation.GetExchange;
 
 import java.util.List;
@@ -29,14 +27,16 @@ public class StudentController {
     public String listStudents(Model model) {
 
 
-        // get data from DB
-        List<Student> students = studentService.getAllStudents();
+        //// get data from DB
+        //List<Student> students = studentService.getAllStudents();
+        //
+        //// add to Model
+        //model.addAttribute("students", students);
+        //
+        //// return view name
+        //return "views/students";
 
-        // add to Model
-        model.addAttribute("students", students);
-
-        // return view name
-        return "views/students";
+        return findPaginated(1, "name", "asc", model);
     }
 
     @GetMapping("/students/showNewStudentForm")
@@ -91,5 +91,30 @@ public class StudentController {
         studentService.updateStudent(student);
 
         return "redirect:/students";
+    }
+
+    @GetMapping("/students/page/{pageNo}")
+    public String findPaginated(@PathVariable("pageNo") int pageNo,
+                                @RequestParam("sortField") String sortField,
+                                @RequestParam("sortDir") String sortDir,
+                                Model model) {
+
+        int pageSize = 1;
+
+        Page<Student> page = studentService.findPaginated(pageNo, pageSize, sortField, sortDir);
+        List<Student> students = page.getContent();
+
+        model.addAttribute("currentPage", pageNo);
+        model.addAttribute("totalPages", page.getTotalPages());
+        model.addAttribute("totalItems", page.getTotalElements());
+
+        model.addAttribute("sortField", sortField);
+        model.addAttribute("sortDir", sortDir);
+        model.addAttribute("reverseSortDir", sortDir.equals("asc") ? "desc" : "asc");
+
+        model.addAttribute("students", students);
+
+        return "views/students";
+
     }
 }
